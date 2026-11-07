@@ -34,6 +34,8 @@ ynh_setup_source --dest_dir="$install_dir" --full_replace
 sed -i "s|\"/app/chromedriver\"|\"$install_dir/chromedriver\"|g" "$install_dir/src/utils.py"
 install -m 755 -o "$app" -g "$app" /usr/bin/chromedriver "$install_dir/chromedriver"
 
+chown -R "$app:$app" "$install_dir"
+
 ynh_script_progression "Reinstalling Python dependencies... This may take a few minutes."
 
 ynh_exec_as_app env HOME="$data_dir" \

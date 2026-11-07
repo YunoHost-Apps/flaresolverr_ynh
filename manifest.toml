@@ -13,7 +13,6 @@ maintainers = []
 
 [upstream]
 license = "MIT"
-website = "https://github.com/FlareSolverr/FlareSolverr"
 admindoc = "https://github.com/FlareSolverr/FlareSolverr/blob/master/README.md"
 code = "https://github.com/FlareSolverr/FlareSolverr"
 cpe = "cpe:2.3:a:flaresolverr:flaresolverr"

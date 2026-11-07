@@ -22,6 +22,8 @@ ynh_script_progression "Deploying the system chromedriver..."
 sed -i "s|\"/app/chromedriver\"|\"$install_dir/chromedriver\"|g" "$install_dir/src/utils.py"
 install -m 755 -o "$app" -g "$app" /usr/bin/chromedriver "$install_dir/chromedriver"
 
+chown -R "$app:$app" "$install_dir"
+
 #=================================================
 # PYTHON VIRTUAL ENV
 #=================================================
