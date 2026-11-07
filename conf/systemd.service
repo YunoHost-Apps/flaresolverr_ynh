@@ -1,0 +1,34 @@
+[Unit]
+Description=FlareSolverr Cloudflare bypass proxy (__APP__)
+After=network-online.target
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+EnvironmentFile=__INSTALL_DIR__/.env
+Environment=HOME=__DATA_DIR__
+WorkingDirectory=__INSTALL_DIR__/src
+ExecStart=__INSTALL_DIR__/venv/bin/python -u __INSTALL_DIR__/src/flaresolverr.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+StandardOutput=append:/var/log/__APP__/__APP__.log
+StandardError=inherit
+
+### Chromium (sandbox disabled by the app via --no-sandbox) needs real device
+### access and namespace cloning for its renderer processes, so the
+### example_ynh hardening baseline is relaxed here the same way upstream's own
+### systemd unit and Docker image do.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

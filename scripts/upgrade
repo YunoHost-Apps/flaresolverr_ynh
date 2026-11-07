@@ -1,0 +1,76 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Stopping $app's systemd service..."
+
+ynh_systemctl --service="$app" --action="stop"
+
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+ynh_script_progression "Upgrading system dependencies..."
+
+### Pulls a newer chromium/chromium-driver if available; the copy and the
+### venv are rebuilt below from the new state.
+ynh_exec_warn_less apt-get update -qq
+ynh_exec_warn_less apt-get -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" install -y -qq --only-upgrade chromium chromium-driver
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression "Upgrading source files..."
+
+ynh_setup_source --dest_dir="$install_dir" --full_replace
+
+sed -i "s|\"/app/chromedriver\"|\"$install_dir/chromedriver\"|g" "$install_dir/src/utils.py"
+install -m 755 -o "$app" -g "$app" /usr/bin/chromedriver "$install_dir/chromedriver"
+
+ynh_script_progression "Reinstalling Python dependencies... This may take a few minutes."
+
+ynh_exec_as_app env HOME="$data_dir" \
+    python3 -m venv "$install_dir/venv"
+ynh_exec_as_app env HOME="$data_dir" \
+    bash -c "cd '$install_dir' && '$install_dir/venv/bin/pip' install --quiet --no-input --disable-pip-version-check -r requirements.txt"
+
+#=================================================
+# UPDATE CONFIG FILES
+#=================================================
+ynh_script_progression "Updating $app's configuration files..."
+
+timezone=$(cat /etc/timezone)
+ynh_config_add --template="flaresolverr.env" --destination="$install_dir/.env"
+
+chown -R "$app:$app" "$install_dir"
+
+#=================================================
+# REAPPLY SYSTEM CONFIGURATIONS
+#=================================================
+ynh_script_progression "Upgrading system configurations related to $app..."
+
+ynh_config_add_systemd
+
+ynh_config_add_logrotate
+
+yunohost service add "$app" --description="Cloudflare bypass proxy for the arr suite" --log="/var/log/$app/$app.log"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Starting $app's systemd service..."
+
+ynh_systemctl --service="$app" --action="start" --wait_until="FlareSolverr [0-9]" --log_path="/var/log/$app/$app.log"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Upgrade of $app completed"

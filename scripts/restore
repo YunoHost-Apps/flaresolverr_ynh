@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+source ../settings/scripts/_common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+ynh_script_progression "Restoring the app main dir..."
+
+ynh_restore "$install_dir"
+chown -R "$app:$app" "$install_dir"
+
+ynh_restore "$data_dir"
+chown -R "$app:$app" "$data_dir"
+
+#=================================================
+# RESTORE SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Restoring system configurations related to $app..."
+
+ynh_restore "/etc/systemd/system/$app.service"
+systemctl enable "$app.service" --quiet
+systemctl daemon-reload
+
+yunohost service add "$app" --description="Cloudflare bypass proxy for the arr suite" --log="/var/log/$app/$app.log"
+
+ynh_restore "/etc/logrotate.d/$app"
+
+ynh_restore "/var/log/$app/"
+
+#=================================================
+# START THE SERVICE
+#=================================================
+ynh_script_progression "Starting $app's systemd service..."
+
+ynh_systemctl --service="$app" --action="start" --wait_until="FlareSolverr [0-9]" --log_path="/var/log/$app/$app.log"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Restoration completed for $app"

@@ -1,0 +1,68 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression "Setting up source files..."
+
+ynh_setup_source --dest_dir="$install_dir"
+
+### Upstream hardcodes '/app/chromedriver' (a Docker-ism) to detect a
+### preinstalled driver; point it at a per-instance copy of the Debian
+### chromium-driver so multi-instance installs don't fight over /app.
+ynh_script_progression "Deploying the system chromedriver..."
+
+sed -i "s|\"/app/chromedriver\"|\"$install_dir/chromedriver\"|g" "$install_dir/src/utils.py"
+install -m 755 -o "$app" -g "$app" /usr/bin/chromedriver "$install_dir/chromedriver"
+
+#=================================================
+# PYTHON VIRTUAL ENV
+#=================================================
+ynh_script_progression "Installing Python dependencies... This may take a few minutes."
+
+ynh_exec_as_app env HOME="$data_dir" \
+    python3 -m venv "$install_dir/venv"
+ynh_exec_as_app env HOME="$data_dir" \
+    bash -c "cd '$install_dir' && '$install_dir/venv/bin/pip' install --quiet --no-input --disable-pip-version-check -r requirements.txt"
+
+#=================================================
+# APP INITIAL CONFIGURATION
+#=================================================
+ynh_script_progression "Adding $app's configuration files..."
+
+timezone=$(cat /etc/timezone)
+ynh_config_add --template="flaresolverr.env" --destination="$install_dir/.env"
+
+chown -R "$app:$app" "$install_dir"
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Adding system configurations related to $app..."
+
+ynh_config_add_systemd
+
+### (also creates /var/log/$app owned by the app user)
+ynh_config_add_logrotate
+
+yunohost service add "$app" --description="Cloudflare bypass proxy for the arr suite" --log="/var/log/$app/$app.log"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Starting $app's systemd service..."
+
+ynh_systemctl --service="$app" --action="start" --wait_until="FlareSolverr [0-9]" --log_path="/var/log/$app/$app.log"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Installation of $app completed — point your arr apps' FlareSolverr/proxy setting at http://127.0.0.1:$port (see doc/ADMIN.md)"
