@@ -21,8 +21,8 @@ ynh_script_progression "Upgrading system dependencies..."
 
 ### Pulls a newer chromium/chromium-driver if available; the copy and the
 ### venv are rebuilt below from the new state.
-ynh_exec_warn_less apt-get update -qq
-ynh_exec_warn_less apt-get -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" install -y -qq --only-upgrade chromium chromium-driver
+apt-get update -qq
+apt-get -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef" install -y -qq --only-upgrade chromium chromium-driver
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
