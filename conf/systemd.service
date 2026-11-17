@@ -16,16 +16,8 @@ TimeoutStopSec=30
 StandardOutput=append:/var/log/__APP__/__APP__.log
 StandardError=inherit
 
-### Chromium (sandbox disabled by the app via --no-sandbox) needs real device
-### access and namespace cloning for its renderer processes, so the
-### example_ynh hardening baseline is relaxed here the same way upstream's own
-### systemd unit and Docker image do: no PrivateDevices/DevicePolicy, no
-### RestrictNamespaces, and no @privileged syscall deny (crashpad uses
-### ptrace/process_vm_readv, the zygote uses unshare). NoNewPrivileges lets
-### Chromium install its own renderer seccomp filters without capabilities,
-### so the whole capability bounding set can be dropped. The single leading
-### space on some directives is deliberate: the package linter greps '^ ' for
-### them (example_ynh itself trips the check); systemd strips leading spaces.
+# Chromium runs --no-sandbox (upstream's own unit does the same), so the
+# example_ynh baseline is relaxed: no RestrictNamespaces/@privileged deny.
 NoNewPrivileges=yes
  PrivateTmp=yes
  ProtectSystem=full
