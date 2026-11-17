@@ -4,24 +4,22 @@ It shall NOT be edited by hand.
 -->
 
 <h1>
-  <img src="logos/flaresolverr.png" width="32px" alt="Logo of FlareSolverr">
+  <img src="https://raw.githubusercontent.com/YunoHost/apps/main/logos/flaresolverr.png" width="32px" alt="Logo of FlareSolverr">
   FlareSolverr, packaged for YunoHost
 </h1>
 
 Proxy server to bypass Cloudflare protection
 
-[![Version: 3.5.2~ynh1](https://img.shields.io/badge/Version-3.5.2~ynh1-128a0b?style=for-the-badge)](https://github.com/YunoHost-Apps/flaresolverr_ynh/blob/master/manifest.toml)
+[![Version: 3.5.2~ynh1](https://img.shields.io/badge/Version-3.5.2~ynh1-rgb(18,138,11)?style=for-the-badge)](https://ci-apps.yunohost.org/ci/apps/flaresolverr/)
 
-Proxy server with no web UI, built for the arr suite (Prowlarr, Lidarr,
-Radarr, Sonarr...): it runs a headless Chromium to solve Cloudflare
-JavaScript challenges on behalf of other applications on the server. This
-package runs upstream's native Python with the system Chromium, so it works
-on both amd64 and arm64.
-
-It listens on 127.0.0.1 only; point your arr apps' Proxy setting at
-`http://127.0.0.1:<port>` — see doc/ADMIN.md.
+<div align="center">
+<a href="https://apps.yunohost.org/app/flaresolverr"><img height="100px" src="https://github.com/YunoHost/yunohost-artwork/raw/refs/heads/main/badges/neopossum-badges/badge_more_info_on_the_appstore.svg"/></a>
+<a href="https://github.com/YunoHost-Apps/flaresolverr_ynh/issues"><img height="100px" src="https://github.com/YunoHost/yunohost-artwork/raw/refs/heads/main/badges/neopossum-badges/badge_report_an_issue.svg"/></a>
+</div>
 
 ## 📦 Developer info
+
+[![Automatic tests level](https://apps.yunohost.org/badge/cilevel/flaresolverr)](https://ci-apps.yunohost.org/ci/apps/flaresolverr/)
 
 🛠️ Upstream FlareSolverr repository: <https://github.com/FlareSolverr/FlareSolverr>
 
