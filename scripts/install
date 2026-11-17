@@ -14,9 +14,8 @@ ynh_script_progression "Setting up source files..."
 
 ynh_setup_source --dest_dir="$install_dir"
 
-### Upstream hardcodes '/app/chromedriver' (a Docker-ism) to detect a
-### preinstalled driver; point it at a per-instance copy of the Debian
-### chromium-driver so multi-instance installs don't fight over /app.
+# Upstream hardcodes '/app/chromedriver' (Docker-ism); point it at a
+# per-instance copy of the Debian chromium-driver (multi-instance safe).
 ynh_script_progression "Deploying the system chromedriver..."
 
 sed -i "s|\"/app/chromedriver\"|\"$install_dir/chromedriver\"|g" "$install_dir/src/utils.py"
